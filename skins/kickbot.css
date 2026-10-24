@@ -1,0 +1,111 @@
+/* Stream Wall skin — KickBot tips (kickbot.com/dashboard/tipping/earnings), dressed like the chat
+   overlay: tipper in a tag on the card's top edge; amount, status, time and the ⋯ menu in the card,
+   message in full underneath. Only the tip list is kept — sidebars, header, hero, stats and chart go.
+   The page is laid out 1280px wide (KickBot's desktop layout) and zoomed ×1.6, so sizes below read
+   as on an 800px page; the panel then scales that to fit.
+   DOM (read from the real page, 2026-10-23):
+     section#tip-history > div.kb-grp > div.group  (one per tip)
+       > div (display:contents) > span.tabular-nums = amount · button = tipper
+       > p = message · > span.col-start-2 = status (dot .bg-kb-emerald = approved)
+       > span.tabular-nums = "N days ago" · > div.col-start-3 = ⋯ menu
+   Everything is gated on html:has(#tip-history): any other page (login, notice) shows as it is. */
+
+html, body { background: transparent !important; }
+html:has(#tip-history) body { zoom: 1.6; }
+
+/* ---- keep only the tip list ---- */
+html:has(#tip-history) body *:not(:has(#tip-history)):not(#tip-history):not(#tip-history *) { display: none !important; }
+html:has(#tip-history) body *:has(#tip-history) {
+  display: block !important;
+  position: static !important;
+  width: auto !important; min-width: 0 !important; max-width: none !important;
+  margin: 0 !important; padding: 0 !important;
+  border: 0 !important; border-radius: 0 !important;
+  background: transparent !important; box-shadow: none !important;
+  overflow: visible !important; transform: none !important;
+}
+#tip-history > :not(.kb-grp) { display: none !important; } /* "Tips · 100" heading, export button */
+#tip-history .kb-grp {
+  display: flex !important; flex-direction: column; gap: 62px;
+  padding: 50px 20px 30px !important;
+  background: transparent !important; border: 0 !important; box-shadow: none !important; border-radius: 0 !important;
+}
+
+/* ---- the card ---- */
+#tip-history .kb-grp > .group {
+  position: relative;
+  display: flex !important; flex-wrap: wrap; align-items: center; gap: 10px 22px;
+  padding: 44px 26px 20px !important;
+  background: var(--sw-card-bg) !important;
+  border: calc(3px * var(--sw-k-bw)) solid var(--sw-card-line) !important;
+  border-bottom-width: calc(7px * var(--sw-k-bb)) !important;
+  border-radius: calc(26px * var(--sw-k-r)) !important;
+  box-shadow: var(--sw-card-shadow) !important;
+  -webkit-backdrop-filter: var(--sw-card-blur) !important;
+  backdrop-filter: var(--sw-card-blur) !important;
+  cursor: default !important;
+}
+#tip-history .kb-grp > .group > div:first-child { display: contents !important; } /* amount + tipper join the card */
+#tip-history .kb-grp > .group * { font-family: var(--sw-font) !important; }
+
+/* ---- name tag ---- */
+#tip-history .kb-grp > .group > div > button {
+  position: absolute; top: -35px; left: 50%;
+  transform: translateX(-50%);
+  display: flex !important; align-items: center; gap: 12px;
+  max-width: calc(100% - 40px);
+  padding: 7px 22px 10px 18px !important;
+  background: var(--sw-tag-bg) !important;
+  border: calc(3px * var(--sw-k-bw)) solid var(--sw-card-line) !important;
+  border-bottom-width: calc(6px * var(--sw-k-bb)) !important;
+  border-radius: calc(18px * var(--sw-k-r)) !important;
+  box-shadow: var(--sw-tag-shadow) !important;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  font-size: 31px !important; font-weight: 800 !important; line-height: 1.2 !important;
+  color: var(--sw-tag-ink) !important;
+  z-index: 1;
+}
+#tip-history .kb-grp > .group > div > button::before { /* the badge, like "KICK" in the chat tags */
+  content: "TIP";
+  flex: none;
+  padding: 5px 9px;
+  border-radius: calc(8px * var(--sw-k-r));
+  background: var(--sw-badge-bg);
+  color: var(--sw-badge-ink);
+  box-shadow: var(--sw-badge-ring);
+  font: 900 17px/1 var(--sw-font);
+  letter-spacing: 0.04em;
+}
+
+/* ---- inside the card ---- */
+#tip-history .kb-grp > .group > div > span { font-size: 40px !important; font-weight: 900 !important; color: var(--sw-text) !important; letter-spacing: -0.01em; }
+/* status: an approved tip is the normal case, only an unusual status (pending, refunded…) shows */
+#tip-history .kb-grp > .group > span.col-start-2 { font-size: 17px !important; padding: 4px 10px !important; border-radius: 7px !important; background: color-mix(in srgb, var(--sw-text) 8%, transparent); color: var(--sw-muted) !important; }
+#tip-history .kb-grp > .group > span.col-start-2:has(> .bg-kb-emerald) { display: none !important; }
+/* time: "1 day ago" → "۱ روز پیش" (shared.js tidy puts it in data-sw-text) */
+#tip-history .kb-grp > .group > span.tabular-nums { display: block !important; margin-inline-start: auto; font-size: 22px !important; font-weight: 600 !important; color: var(--sw-muted) !important; }
+#tip-history .kb-grp > .group > span.tabular-nums[data-sw-text] { font-size: 0 !important; }
+#tip-history .kb-grp > .group > span.tabular-nums[data-sw-text]::after { content: attr(data-sw-text); font-size: 22px; direction: rtl; unicode-bidi: isolate; }
+/* the ⋯ menu (replay, refund…) only while the card is hovered: less noise, no accidental refund */
+#tip-history .kb-grp > .group > div.col-start-3 { display: none !important; width: 44px !important; height: 44px !important; }
+#tip-history .kb-grp > .group:hover > div.col-start-3 { display: grid !important; }
+#tip-history .kb-grp > .group > div.col-start-3 button { width: 44px !important; height: 44px !important; color: var(--sw-muted) !important; }
+#tip-history .kb-grp > .group > div.col-start-3 button:hover { color: var(--sw-text) !important; }
+
+/* the message: a full line under the details, like a chat line */
+#tip-history .kb-grp > .group > p {
+  order: 9; flex-basis: 100%;
+  margin: 0 !important;
+  white-space: normal !important; overflow: visible !important; text-overflow: clip !important;
+  unicode-bidi: plaintext; text-align: start; overflow-wrap: anywhere;
+  font-size: 27px !important; font-weight: 700 !important; line-height: 1.75 !important;
+  color: var(--sw-text) !important;
+}
+#tip-history .kb-grp > .group > p > span { display: none !important; } /* KickBot's phone-only prefix */
+
+/* ---- subs and gift subs from Sahne Plus (kickbot-sahne.js), placed between the tips by time ---- */
+#tip-history .kb-grp > .group.sw-sahne > div > button { cursor: default; }
+#tip-history .kb-grp > .group.sw-sahne[data-kind="sub"] > div > button::before { content: "SUB"; }
+#tip-history .kb-grp > .group.sw-sahne[data-kind="gift"] > div > button::before { content: "GIFT"; }
+#tip-history .kb-grp > .group.sw-sahne > div > span { font-size: 34px !important; unicode-bidi: plaintext; }
+#tip-history .kb-grp > .group.sw-sahne > p { font-size: 22px !important; font-weight: 600 !important; color: var(--sw-muted) !important; line-height: 1.6 !important; direction: rtl; }

@@ -1,0 +1,119 @@
+/* Stream Wall skin — Donofa alerts (donofa.com/cpanel), dressed like the chat overlay:
+   donor name in a tag on the card's top edge (the heart is its badge, like "KICK" in chat),
+   amount and message in the card below. Colours/font come from the wall (shared.js tokens).
+   DOM per the real loaded page: .feedList > .glassCard.eventCard > .contentWrapper >
+   .cardTop (.cardTopRight replay button | .cardTopLeft .donatorDetails) · .cardEventContent ·
+   .cardDescSection > .glassCard.eventDescCollapsible (a nested card!) > … .descFull */
+
+html, body, .cpanelLayout, .cpanelPage, .cpanelFeed { background: transparent !important; }
+body, body *:not(svg):not(svg *) { font-family: var(--sw-font) !important; }
+
+.cpanelHeader { display: none !important; } /* the wall's own name tag already says what this is */
+.cpanelFeed { padding: 36px 8px 120px !important; }
+.feedList { gap: 46px !important; max-width: none !important; width: auto !important; margin: 0 !important; }
+
+/* ---- the card ---- */
+.glassCard.eventCard {
+  position: relative !important;
+  overflow: visible !important;
+  background: var(--sw-card-bg) !important;
+  border: calc(2px * var(--sw-k-bw)) solid var(--sw-card-line) !important;
+  border-bottom-width: calc(5px * var(--sw-k-bb)) !important;
+  border-radius: calc(18px * var(--sw-k-r)) !important;
+  box-shadow: var(--sw-card-shadow) !important;
+  -webkit-backdrop-filter: var(--sw-card-blur) !important;
+  backdrop-filter: var(--sw-card-blur) !important;
+}
+.glassCard.eventCard::before, .glassCard.eventCard::after { display: none !important; }
+.eventCard > .contentWrapper { padding: 30px 18px 15px !important; gap: 4px !important; }
+
+/* ---- name tag ---- */
+.eventCard .cardTop { min-height: 0 !important; height: 0 !important; margin: 0 !important; }
+.eventCard .donatorDetails {
+  position: absolute !important;
+  top: -25px; left: 50%;
+  transform: translateX(-50%);
+  display: flex !important; align-items: center; gap: 9px;
+  max-width: calc(100% - 28px);
+  padding: 5px 15px 7px 13px !important;
+  background: var(--sw-tag-bg) !important;
+  border: calc(2px * var(--sw-k-bw)) solid var(--sw-card-line) !important;
+  border-bottom-width: calc(4px * var(--sw-k-bb)) !important;
+  border-radius: calc(13px * var(--sw-k-r)) !important;
+  box-shadow: var(--sw-tag-shadow) !important;
+  white-space: nowrap;
+  z-index: 2;
+}
+.eventCard .donatorDetails .icon {
+  flex: none;
+  width: 26px !important; height: 26px !important;
+  display: grid !important; place-items: center;
+  border-radius: calc(7px * var(--sw-k-r));
+  background: var(--sw-badge-bg) !important;
+  color: var(--sw-badge-ink) !important;
+  box-shadow: var(--sw-badge-ring);
+}
+.eventCard .donatorDetails .icon svg { width: 16px !important; height: 16px !important; }
+.eventCard .donatorDetails .icon svg [stroke]:not([stroke="none"]) { stroke: currentColor !important; }
+.eventCard .donatorDetails .icon svg [fill]:not([fill="none"]) { fill: currentColor !important; }
+.eventCard .donorName { display: flex !important; flex-direction: row !important; align-items: baseline; gap: 10px; min-width: 0; }
+.eventCard .donorNameText {
+  font-size: 21px !important; font-weight: 800 !important; line-height: 1.25 !important;
+  color: var(--sw-tag-ink) !important;
+  overflow: hidden; text-overflow: ellipsis;
+}
+.eventCard .dateDisplayContainer { font-size: 14px !important; font-weight: 700 !important; color: var(--sw-muted) !important; opacity: 1 !important; }
+.eventCard .displayAnimatedText:has(.dateValue) { display: none !important; } /* time only, like a chat tag */
+
+/* ---- replay: a small pill in the card's corner, only while the card is hovered ---- */
+.eventCard .cardTopRight { position: absolute !important; top: 12px; left: 12px; z-index: 1; opacity: 0; transition: opacity 0.18s; }
+.eventCard:hover .cardTopRight, .eventCard .cardTopRight:focus-within { opacity: 1; }
+.eventCard .actionBtn {
+  height: 30px !important; min-height: 0 !important; padding: 0 11px !important;
+  font-size: 12px !important; font-weight: 700 !important;
+  color: var(--sw-muted) !important;
+  background: color-mix(in srgb, var(--sw-text) 6%, transparent) !important;
+  border: 1px solid var(--sw-line) !important;
+  border-radius: 999px !important;
+}
+.eventCard .actionBtn:hover { color: var(--sw-text) !important; border-color: var(--sw-accent) !important; }
+
+/* ---- amount ---- */
+.eventCard .amountWrapper { align-items: baseline !important; gap: 7px !important; }
+.eventCard .amountValue { font-size: 27px !important; font-weight: 900 !important; color: var(--sw-text) !important; letter-spacing: -0.01em; }
+.eventCard .currencyValue { font-size: 14px !important; font-weight: 700 !important; color: var(--sw-muted) !important; }
+
+/* ---- message: shown like a chat line; the collapsible's header and box go away ---- */
+.eventCard .cardDescSection { padding: 0 !important; margin: 2px 0 0 !important; }
+.eventCard .eventDescCollapsible {
+  background: transparent !important; border: 0 !important; box-shadow: none !important;
+  -webkit-backdrop-filter: none !important; backdrop-filter: none !important;
+}
+.eventCard .eventDescCollapsible::before, .eventCard .eventDescCollapsible::after { display: none !important; }
+.eventCard .eventDescCollapsible > .contentWrapper { padding: 0 !important; }
+.eventCard .collapsibleTrigger { display: none !important; }
+.eventCard .collapsibleBody, .eventCard .collapsibleContent {
+  display: block !important; height: auto !important; max-height: none !important;
+  opacity: 1 !important; visibility: visible !important; overflow: visible !important;
+}
+.eventCard .cardDescSection[data-sw-empty] { display: none !important; } /* empty or just "." (shared.js tidy) */
+.eventCard .descFull, .eventCard .descPreview {
+  font-size: 18px !important; font-weight: 700 !important; line-height: 1.8 !important;
+  color: var(--sw-text) !important;
+  unicode-bidi: plaintext; overflow-wrap: anywhere;
+}
+
+/* Donofa's own toolbar (settings · mute · skip the current alert): tucked into the bottom-left
+   corner and shown only while the panel is hovered, instead of a red pill floating mid-panel. */
+.toolbarWrapper {
+  position: fixed !important; left: 10px !important; right: auto !important; bottom: 10px !important;
+  transform: none !important; translate: none !important;
+  opacity: 0; transition: opacity 0.2s;
+}
+html:hover .toolbarWrapper { opacity: 0.92; }
+.toolbarWrapper button {
+  background: var(--sw-tag) !important;
+  color: var(--sw-muted) !important;
+  border-color: var(--sw-line) !important;
+}
+.toolbarWrapper button:hover { color: var(--sw-text) !important; }

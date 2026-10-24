@@ -1,0 +1,121 @@
+/* Stream Wall skin — Kick reward request queue (dashboard.kick.com/popout/<channel>/reward-request-queue),
+   dressed like the chat overlay: the viewer's name (in their own Kick colour) in a "KICK" tag on the
+   card's top edge; the reward as a pill, the message and approve/reject in the card.
+   The panel renders Kick at desktop width (1000px, scaled to fit) with the category column hidden,
+   so the requests themselves fill it; sizes below are for that 1000px page.
+   Kick's classes are generic Tailwind, so things are found by structure: a request = the wrapper of a
+   row that holds a checkbox (read from the real page, 2026-10-20). */
+
+html, body, body > div, body > div > div { background: transparent !important; }
+body, body *:not(svg):not(svg *) { font-family: var(--sw-font) !important; }
+
+/* the "Reward request queue" strip — the panel's own name tag already says it */
+body > div > div.h-10:first-child { display: none !important; }
+
+/* the category column goes; the request list takes the whole page */
+div.flex.w-full > div.rounded-md:has(button.rounded-md.p-2) { display: none !important; }
+div.border-l:has(button[role="checkbox"]) { border: 0 !important; padding-left: 0 !important; }
+.border-t { border-color: var(--sw-line) !important; }
+
+/* no bulk actions on stream: one misclick on "Reject all" would reject every request */
+button[role="checkbox"] { display: none !important; }
+div.border-t.py-3 > :not(:first-child) { display: none !important; }
+div.border-t.py-3 > :first-child > :has(button[role="checkbox"]) { display: none !important; } /* "Select All" */
+div.border-t.py-3 > :first-child { justify-content: center !important; }
+div.border-t.py-3 { font-size: 20px !important; color: var(--sw-muted) !important; }
+/* kick-sort.js put every request on one page, newest first: the "1 of 2" pager has nothing to do */
+html[data-sw-all-pages] div.border-t.py-3 { display: none !important; }
+
+/* ---- a request: the card ---- */
+div:has(> div.flex.w-full.gap-3 > button[role="checkbox"]) {
+  position: relative;
+  margin: 62px 10px 0 4px;
+  padding: 42px 26px 18px;
+  background: var(--sw-card-bg) !important;
+  border: calc(3px * var(--sw-k-bw)) solid var(--sw-card-line) !important;
+  border-bottom-width: calc(7px * var(--sw-k-bb)) !important;
+  border-radius: calc(24px * var(--sw-k-r)) !important;
+  box-shadow: var(--sw-card-shadow) !important;
+  -webkit-backdrop-filter: var(--sw-card-blur) !important;
+  backdrop-filter: var(--sw-card-blur) !important;
+}
+div:has(> div.flex.w-full.gap-3 > button[role="checkbox"]) > :not(div.flex.w-full.gap-3) { display: none !important; } /* Kick's divider */
+div:has(> div.flex.w-full.gap-3 > button[role="checkbox"]) > div.flex.w-full.gap-3 { align-items: center; }
+/* the card reads right-to-left: reward and message on the right, ✓ / ✕ on the left */
+div:has(> div.flex.w-full.gap-3 > button[role="checkbox"]) div.flex.flex-1.flex-col { direction: rtl; }
+
+/* the viewer's name → the tag, with a KICK badge like the chat overlay */
+div:has(> div.flex.w-full.gap-3 > button[role="checkbox"]) div.inline-flex:has(> button.inline) {
+  position: absolute !important;
+  top: -34px; left: 50%;
+  translate: -50% 0;
+  display: flex !important; align-items: center; gap: 12px;
+  max-width: calc(100% - 40px);
+  padding: 7px 22px 10px 9px !important;
+  background: var(--sw-tag-bg) !important;
+  border: calc(3px * var(--sw-k-bw)) solid var(--sw-card-line) !important;
+  border-bottom-width: calc(6px * var(--sw-k-bb)) !important;
+  border-radius: calc(18px * var(--sw-k-r)) !important;
+  box-shadow: var(--sw-tag-shadow) !important;
+  white-space: nowrap;
+  direction: ltr; /* "KICK name", like the chat overlay */
+  z-index: 1;
+}
+div:has(> div.flex.w-full.gap-3 > button[role="checkbox"]) div.inline-flex:has(> button.inline)::before {
+  content: "KICK";
+  flex: none;
+  padding: 6px 9px;
+  border-radius: calc(8px * var(--sw-k-r));
+  background: var(--sw-badge-bg);
+  color: var(--sw-badge-ink);
+  box-shadow: var(--sw-badge-ring);
+  font: 900 17px/1 var(--sw-font);
+  letter-spacing: 0.03em;
+}
+div:has(> div.flex.w-full.gap-3 > button[role="checkbox"]) div.inline-flex > button.inline {
+  font-size: 30px !important; font-weight: 800 !important; line-height: 1.2 !important;
+  overflow: hidden; text-overflow: ellipsis;
+}
+
+/* line 1: the reward as a pill, the time quiet (in Persian, via data-sw-text) */
+div:has(> div.flex.w-full.gap-3 > button[role="checkbox"]) div.justify-between:first-child { align-items: center; }
+div:has(> div.flex.w-full.gap-3 > button[role="checkbox"]) div.justify-between:first-child > span:first-child {
+  flex: none;
+  max-width: 70%;
+  padding: 5px 14px !important;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--sw-accent) 16%, transparent) !important;
+  color: var(--sw-accent) !important;
+  font-size: 21px !important; font-weight: 800 !important;
+}
+div:has(> div.flex.w-full.gap-3 > button[role="checkbox"]) div.justify-between:first-child > span:last-child {
+  font-size: 19px !important; font-weight: 600 !important; color: var(--sw-muted) !important;
+}
+div:has(> div.flex.w-full.gap-3 > button[role="checkbox"]) div.justify-between:first-child > span[data-sw-text] { font-size: 0 !important; }
+div:has(> div.flex.w-full.gap-3 > button[role="checkbox"]) div.justify-between:first-child > span[data-sw-text]::after {
+  content: attr(data-sw-text); font-size: 19px; direction: rtl; unicode-bidi: isolate;
+}
+
+/* line 2: the message, shown like a chat line (right-aligned for Persian), then ✓ / ✕ */
+div:has(> div.flex.w-full.gap-3 > button[role="checkbox"]) div.justify-between:last-child { align-items: center; gap: 18px !important; }
+div:has(> div.flex.w-full.gap-3 > button[role="checkbox"]) span.overflow-hidden.py-1 {
+  display: block !important; flex: 1; min-width: 0;
+  overflow: visible !important; white-space: normal !important; text-overflow: clip !important;
+  font-size: 0 !important; /* hides the bare ":" Kick puts between the name (now the tag) and the message */
+}
+div:has(> div.flex.w-full.gap-3 > button[role="checkbox"]) span.rounded-xs {
+  display: block; width: 100%;
+  padding: 0 !important;
+  background: transparent !important;
+  color: var(--sw-text) !important;
+  font-size: 28px !important; font-weight: 700 !important; line-height: 1.7 !important;
+  white-space: normal !important;
+  unicode-bidi: plaintext; text-align: start; overflow-wrap: anywhere;
+}
+div:has(> div.flex.w-full.gap-3 > button[role="checkbox"]) div.justify-between:last-child > span:last-child button {
+  width: 52px !important; height: 52px !important;
+  border-radius: 14px !important;
+  background: color-mix(in srgb, var(--sw-text) 7%, transparent) !important;
+  border: 2px solid var(--sw-line) !important;
+}
+div:has(> div.flex.w-full.gap-3 > button[role="checkbox"]) div.justify-between:last-child > span:last-child button svg { width: 24px !important; height: 24px !important; }

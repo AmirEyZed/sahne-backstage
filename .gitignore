@@ -1,0 +1,9 @@
+# personal panels and links of one streamer's own copy — never published
+owner.json
+# builds
+*.zip
+dist/
+# OS clutter
+Thumbs.db
+desktop.ini
+.DS_Store

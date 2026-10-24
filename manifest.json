@@ -1,0 +1,125 @@
+{
+  "manifest_version": 3,
+  "name": "پشت‌صحنه · Sahne Backstage",
+  "version": "2.8.3",
+  "description": "پشت‌صحنه، از خانوادهٔ صحنه: چت، دونیت‌ها، تیپ‌ها و ریواردها کنار هم روی مانیتور استریم، با تم، فونت و پس‌زمینهٔ دلخواه.",
+  "minimum_chrome_version": "116",
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "action": {
+    "default_title": "باز کردن پشت‌صحنه",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png"
+    }
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "permissions": [
+    "declarativeNetRequest",
+    "storage",
+    "unlimitedStorage",
+    "cookies"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "<all_urls>"
+      ],
+      "js": [
+        "cookie-shim.js"
+      ],
+      "all_frames": true,
+      "run_at": "document_start",
+      "world": "MAIN"
+    },
+    {
+      "matches": [
+        "https://elements.meldstudio.co/*"
+      ],
+      "js": [
+        "meld-mute.js"
+      ],
+      "all_frames": true,
+      "run_at": "document_start",
+      "world": "MAIN"
+    },
+    {
+      "matches": [
+        "https://dashboard.kick.com/*"
+      ],
+      "js": [
+        "kick-sort.js"
+      ],
+      "all_frames": true,
+      "run_at": "document_start",
+      "world": "MAIN"
+    },
+    {
+      "matches": [
+        "<all_urls>"
+      ],
+      "js": [
+        "shared.js",
+        "content.js"
+      ],
+      "all_frames": true,
+      "run_at": "document_start"
+    },
+    {
+      "matches": [
+        "https://elements.meldstudio.co/*"
+      ],
+      "js": [
+        "chat-history.js"
+      ],
+      "all_frames": true,
+      "run_at": "document_idle"
+    },
+    {
+      "matches": [
+        "http://127.0.0.1:7788/*",
+        "http://localhost:7788/*"
+      ],
+      "js": [
+        "sahne-feed.js"
+      ],
+      "all_frames": true,
+      "run_at": "document_start"
+    },
+    {
+      "matches": [
+        "https://kickbot.com/*"
+      ],
+      "js": [
+        "kickbot-sahne.js"
+      ],
+      "all_frames": true,
+      "run_at": "document_idle"
+    }
+  ],
+  "commands": {
+    "toggle-edit": {
+      "suggested_key": {
+        "default": "Alt+Shift+L"
+      },
+      "description": "روشن/خاموش کردن حالت ویرایش چیدمان"
+    },
+    "toggle-settings": {
+      "suggested_key": {
+        "default": "Alt+Shift+S"
+      },
+      "description": "باز/بسته کردن تنظیمات"
+    }
+  },
+  "short_name": "پشت‌صحنه",
+  "homepage_url": "https://github.com/AmirEyZed/sahne-backstage"
+}

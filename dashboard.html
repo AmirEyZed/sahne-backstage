@@ -1,0 +1,330 @@
+<!doctype html>
+<html lang="fa" dir="ltr">
+<head>
+  <meta charset="utf-8">
+  <title>پشت‌صحنه</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" href="icons/icon32.png">
+  <!-- UI font for the wall's own controls; the panels' font is chosen in settings -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource-variable/vazirmatn/index.css">
+  <link rel="stylesheet" href="dashboard.css">
+  <style id="sw-tokens"></style>
+</head>
+<body class="booting">
+
+<!-- top bar: shortcuts and the stream's live numbers (topbar.js) -->
+<header id="topBar" dir="rtl">
+  <nav class="tb-links" aria-label="میان‌برها">
+    <a class="tb-link" id="tbDonate" href="#" target="_blank" rel="noopener" hidden><i class="tb-ico">💸</i><span class="tb-label">دونیت</span></a>
+    <a class="tb-link" id="tbHub" href="http://localhost:7799/hub" target="_blank" rel="noopener"><i class="tb-ico">🎛️</i>مرکز کنترل</a>
+    <a class="tb-link" id="tbKick" href="https://kick.com/" target="_blank" rel="noopener"><i class="tb-ico">🟢</i>کیک</a>
+  </nav>
+  <span class="tb-grow"></span>
+  <div class="tb-stats">
+    <span class="tb-stat tb-live" id="tbLive"><i class="tb-dot"></i><b id="tbLiveText">—</b></span>
+    <a class="tb-stat tb-rank" id="tbRank" href="https://streamfa.com/" target="_blank" rel="noopener"><small>رتبه استریم‌فا</small><b id="tbRankVal">—</b></a>
+    <span class="tb-stat tb-local" id="tbRate"><small>بیت‌ریت</small><b id="tbRateVal">—</b></span>
+    <span class="tb-stat tb-local" id="tbPing"><small>پینگ 4.2.2.4</small><b id="tbPingVal">—</b></span>
+  </div>
+</header>
+
+<div id="stage">
+  <div id="bg"></div>
+  <div id="bgDim"></div>
+  <div id="grain"></div>
+  <div id="panels">
+    <i class="guide gv" hidden></i>
+    <i class="guide gh" hidden></i>
+  </div>
+</div>
+
+<div id="editBar" dir="rtl" hidden>
+  <i data-icon="move"></i>
+  <span>پنل را بکش تا جابه‌جا شود · لبه را بکش تا اندازه عوض شود · <kbd>Alt</kbd> بدون چسبیدن · <kbd>Shift</kbd> فقط همان پنل</span>
+  <button id="btnEditDone" type="button" class="btn primary sm"><i data-icon="check"></i>تمام</button>
+</div>
+
+<button id="fab" type="button" title="تنظیمات (Alt+Shift+S)" aria-label="تنظیمات"><i data-icon="settings"></i></button>
+
+<aside id="drawer" dir="rtl" aria-label="تنظیمات پشت‌صحنه" aria-hidden="true">
+  <header class="d-head">
+    <div class="d-brand">
+      <span class="d-logo" title="صحنه"><svg viewBox="0 0 120 160" aria-hidden="true"><path d="M87 6C93 4.5 98 9 98 15V61C98 64 96 65.5 93.5 64.2L58 46C54.5 44.2 52 46.5 52 50V90C52 95 47.5 97.5 43.5 95.2L20 81C14.5 77.8 12 72 12 65V47C12 39.5 16.5 34 23 31L82 8C84 7.2 86 6.5 87 6Z"/><path d="M33 154C27 155.5 22 151 22 145V99C22 96 24 94.5 26.5 95.8L62 114C65.5 115.8 68 113.5 68 110V70C68 65 72.5 62.5 76.5 64.8L100 79C105.5 82.2 108 88 108 95V113C108 120.5 103.5 126 97 129L38 152C36 152.8 34 153.5 33 154Z"/></svg></span>
+      <span class="d-name"><b>پشت‌صحنه</b><small id="verLabel"></small></span>
+    </div>
+    <button id="btnSide" type="button" class="icon-btn" title="بردن تنظیمات به سمت دیگر"><i data-icon="swap"></i></button>
+    <button id="btnFull" type="button" class="icon-btn" title="تمام‌صفحه"><i data-icon="maximize"></i></button>
+    <button id="btnClose" type="button" class="icon-btn" title="بستن (Esc)"><i data-icon="x"></i></button>
+  </header>
+
+  <!-- ===== main settings ===== -->
+  <div id="viewMain" class="d-view">
+    <nav class="tabs" role="tablist" aria-label="بخش‌های تنظیمات">
+      <button type="button" role="tab" data-tab="layout"><i data-icon="layout"></i><span>چیدمان</span></button>
+      <button type="button" role="tab" data-tab="look"><i data-icon="palette"></i><span>ظاهر</span></button>
+      <button type="button" role="tab" data-tab="bg"><i data-icon="image"></i><span>پس‌زمینه</span></button>
+      <button type="button" role="tab" data-tab="more"><i data-icon="more"></i><span>بیشتر</span></button>
+    </nav>
+
+    <div class="d-scroll">
+      <!-- layout -->
+      <section class="pane" role="tabpanel" data-pane="layout">
+        <button id="btnEdit" type="button" class="btn block"><i data-icon="move"></i><span>ویرایش چیدمان</span></button>
+
+        <div class="group">
+          <h4>پنل‌ها</h4>
+          <div id="panelList"></div>
+          <button id="btnAdd" type="button" class="btn ghost block"><i data-icon="plus"></i>افزودن پنل</button>
+        </div>
+
+        <div class="group">
+          <h4>چیدمان آماده <small>پنل‌ها به ترتیب فهرست بالا چیده می‌شوند</small></h4>
+          <div id="presetGrid" class="presets"></div>
+          <label class="field gap-field"><span class="f-label">فاصلهٔ بین پنل‌ها</span><span class="range"><input type="range" min="0" max="40" step="1" data-bind="panelStyle.gap" data-unit="px"><output></output></span></label>
+        </div>
+      </section>
+
+      <!-- look -->
+      <section class="pane" role="tabpanel" data-pane="look" hidden>
+        <div class="group">
+          <h4>سبک <small>شکل پنل‌ها و کارت‌ها · رنگ‌ها از تم</small></h4>
+          <div id="styleGrid" class="styles"></div>
+        </div>
+
+        <div class="group">
+          <h4>تم رنگ</h4>
+          <div id="themeGrid" class="themes"></div>
+        </div>
+
+        <div class="group">
+          <h4>رنگ‌ها</h4>
+          <div class="swatch-row">
+            <label class="swatch-field"><input type="color" class="swatch" data-bind="colors.accent"><span>رنگ اصلی</span></label>
+            <label class="swatch-field"><input type="color" class="swatch" data-bind="colors.panel"><span>پنل</span></label>
+            <label class="swatch-field"><input type="color" class="swatch" data-bind="colors.text"><span>متن</span></label>
+            <label class="swatch-field"><input type="color" class="swatch" data-bind="colors.border"><span>قاب و درخشش</span></label>
+          </div>
+        </div>
+
+        <div class="group">
+          <h4>قاب پنل‌ها</h4>
+          <div class="field"><span class="f-label">سبک</span>
+            <span class="segmented" data-seg="panelStyle.chrome">
+              <button type="button" data-value="tag">برچسب</button>
+              <button type="button" data-value="bar">نوار</button>
+            </span>
+          </div>
+          <label class="field"><span class="f-label">گردی گوشه‌ها</span><span class="range"><input type="range" min="0" max="36" step="1" data-bind="panelStyle.radius" data-unit="px"><output></output></span></label>
+          <label class="field"><span class="f-label">ضخامت قاب</span><span class="range"><input type="range" min="0" max="4" step="0.5" data-bind="panelStyle.borderWidth" data-unit="px"><output></output></span></label>
+          <label class="field"><span class="f-label">کدری پنل</span><span class="range"><input type="range" min="0" max="100" step="1" data-bind="colors.panelAlpha" data-unit="٪"><output></output></span></label>
+          <label class="field"><span class="f-label">تاری پشت پنل</span><span class="range"><input type="range" min="0" max="30" step="1" data-bind="panelStyle.glass" data-unit="px"><output></output></span></label>
+          <label class="field"><span class="f-label">درخشش دور پنل‌ها</span><input type="checkbox" class="switch" data-bind="panelStyle.glow"></label>
+        </div>
+
+        <div class="group">
+          <h4>برچسب نام پنل</h4>
+          <label class="field"><span class="f-label">اندازهٔ برچسب</span><span class="range"><input type="range" min="28" max="56" step="1" data-bind="panelStyle.headH" data-unit="px"><output></output></span></label>
+          <label class="field"><span class="f-label">اندازهٔ نوشته</span><span class="range"><input type="range" min="11" max="26" step="1" data-bind="font.size" data-unit="px"><output></output></span></label>
+          <div class="field"><span class="f-label">ضخامت نوشته</span>
+            <span class="segmented" data-seg="font.weight">
+              <button type="button" data-value="500">معمولی</button>
+              <button type="button" data-value="700">ضخیم</button>
+              <button type="button" data-value="900">خیلی ضخیم</button>
+            </span>
+          </div>
+        </div>
+
+        <div class="group">
+          <h4>فونت <small>برای برچسب‌ها و صفحه‌هایی که «فونت دیوار» دارند</small></h4>
+          <label class="field"><span class="f-label">نوع فونت</span><select id="fontSelect" class="select" data-bind="font.id"></select></label>
+          <label class="field stack" data-font-system><span class="f-label">نام دقیق فونتِ نصب‌شده</span><input type="text" class="input" dir="ltr" placeholder="IRANSansX · Yekan Bakh" data-bind="font.custom" data-lazy></label>
+          <div class="font-preview"><b>چت، دونیت‌ها و ریواردها</b><span>۱۲۳٬۴۵۶ تومان · ۱۲:۴۵</span></div>
+        </div>
+      </section>
+
+      <!-- background -->
+      <section class="pane" role="tabpanel" data-pane="bg" hidden>
+        <div class="group">
+          <h4>نوع پس‌زمینه</h4>
+          <div class="bg-types" data-seg="background.type">
+            <button type="button" data-value="aurora"><i class="bgt bgt-aurora"></i>هاله</button>
+            <button type="button" data-value="gradient"><i class="bgt bgt-gradient"></i>گرادیان</button>
+            <button type="button" data-value="solid"><i class="bgt bgt-solid"></i>تک‌رنگ</button>
+            <button type="button" data-value="image"><i class="bgt bgt-image"></i>عکس</button>
+            <button type="button" data-value="url"><i class="bgt bgt-url"></i>لینک</button>
+          </div>
+        </div>
+
+        <div class="group">
+          <h4>تنظیمات</h4>
+          <div class="swatch-row" data-show="aurora gradient solid">
+            <label class="swatch-field"><input type="color" class="swatch" data-bind="background.c1"><span>رنگ ۱</span></label>
+            <label class="swatch-field" data-show="aurora gradient"><input type="color" class="swatch" data-bind="background.c2"><span>رنگ ۲</span></label>
+            <label class="swatch-field" data-show="aurora gradient"><input type="color" class="swatch" data-bind="background.c3"><span>رنگ ۳</span></label>
+          </div>
+          <label class="field" data-show="gradient"><span class="f-label">زاویه</span><span class="range"><input type="range" min="0" max="360" step="5" data-bind="background.angle" data-unit="°"><output></output></span></label>
+          <div class="field" data-show="image"><span class="f-label">فایل عکس <small>گیف هم می‌شود</small></span>
+            <span class="btn-row"><button type="button" id="btnBgPick" class="btn sm"><i data-icon="upload"></i>انتخاب…</button><button type="button" id="btnBgClear" class="btn sm ghost">حذف</button></span>
+            <input type="file" id="bgFile" accept="image/*" hidden>
+          </div>
+          <label class="field stack" data-show="url"><span class="f-label">لینک عکس یا گیف</span><input type="url" class="input" dir="ltr" placeholder="https://…" data-bind="background.url" data-lazy></label>
+          <div class="field" data-show="image url"><span class="f-label">نمایش</span>
+            <span class="segmented" data-seg="background.fit">
+              <button type="button" data-value="cover">پر کردن</button>
+              <button type="button" data-value="contain">کامل</button>
+            </span>
+          </div>
+          <label class="field"><span class="f-label">تیره کردن</span><span class="range"><input type="range" min="0" max="90" step="1" data-bind="background.dim" data-unit="٪"><output></output></span></label>
+          <label class="field" data-show="image url"><span class="f-label">محو کردن</span><span class="range"><input type="range" min="0" max="30" step="1" data-bind="background.blur" data-unit="px"><output></output></span></label>
+          <label class="field" data-show="aurora gradient"><span class="f-label">حرکت آرام <small>کمی GPU مصرف می‌کند</small></span><input type="checkbox" class="switch" data-bind="background.animate"></label>
+          <label class="field"><span class="f-label">دانه‌دانه <small>گرادیان‌ها نرم‌تر دیده می‌شوند</small></span><input type="checkbox" class="switch" data-bind="background.grain"></label>
+        </div>
+      </section>
+
+      <!-- more -->
+      <section class="pane" role="tabpanel" data-pane="more" hidden>
+        <div class="group">
+          <h4>کانال <small>برای صف ریوارد، لینک‌های نوار بالا و رتبهٔ استریم‌فا</small></h4>
+          <label class="field stack"><span class="f-label">آیدی کیک <small id="kickIdHint">خالی بماند تا خودش پیدا کند</small></span><input type="text" class="input" dir="ltr" maxlength="60" id="kickIdInput" data-bind="kickId" autocomplete="off" spellcheck="false"></label>
+          <label class="field stack"><span class="f-label">صفحهٔ دونیت <small>دکمهٔ دونیت نوار بالا · خالی بماند تا از سایت پنل دونیت و آیدی ساخته شود</small></span><input type="url" class="input" dir="ltr" maxlength="200" id="donatePageInput" data-bind="donatePage" autocomplete="off" spellcheck="false"></label>
+        </div>
+        <div class="group">
+          <h4>صدای اعلان</h4>
+          <label class="field"><span class="f-label">صدا برای مورد تازه <small>دونیت، تیپ و ریوارد هرکدام صدای خودش</small></span><input type="checkbox" class="switch" data-bind="sound.on"></label>
+          <label class="field"><span class="f-label">بلندی</span><span class="range"><input type="range" min="0" max="100" step="5" data-bind="sound.volume" data-unit="٪"><output></output></span></label>
+          <div class="btn-grid">
+            <button type="button" id="btnSoundTest" class="btn"><i data-icon="bell"></i>پخش نمونه</button>
+          </div>
+        </div>
+        <div class="group">
+          <h4>پشتیبان</h4>
+          <div class="btn-grid">
+            <button type="button" id="btnExport" class="btn"><i data-icon="download"></i>خروجی گرفتن</button>
+            <button type="button" id="btnImport" class="btn"><i data-icon="upload"></i>وارد کردن</button>
+          </div>
+          <input type="file" id="importFile" accept="application/json,.json" hidden>
+        </div>
+
+        <div class="group">
+          <h4>میان‌برها</h4>
+          <dl class="keys">
+            <dt><kbd>Alt</kbd><kbd>Shift</kbd><kbd>S</kbd></dt><dd>تنظیمات</dd>
+            <dt><kbd>Alt</kbd><kbd>Shift</kbd><kbd>L</kbd></dt><dd>ویرایش چیدمان</dd>
+            <dt><kbd>F11</kbd></dt><dd>تمام‌صفحه</dd>
+            <dt><kbd>Esc</kbd></dt><dd>بستن / لغو</dd>
+          </dl>
+        </div>
+
+        <div class="group">
+          <h4>راهنما</h4>
+          <ul class="tips">
+            <li>لبهٔ هر پنل را بکش تا اندازه‌اش عوض شود؛ پنل کناری خودش جا باز می‌کند.</li>
+            <li>برچسب نام هر پنل را بکش تا جابه‌جا شود.</li>
+            <li>با رفتن ماوس روی پنل، ابزارهایش کنار برچسب ظاهر می‌شوند: ریز و درشت، برش، بارگذاری دوباره.</li>
+            <li>وقتی دونیت، تیپ یا ریوارد تازه برسد، همان پنل می‌درخشد و برچسبش تعداد تازه‌ها را نشان می‌دهد؛ با کمی ماندن ماوس روی پنل پاک می‌شود.</li>
+            <li>برچسب هر پنل را انتخاب کن (Tab) و با کلیدهای جهت جابه‌جایش کن.</li>
+            <li>اگر پنلی لاگین می‌خواهد: <i data-icon="external"></i> را بزن، در تب لاگین کن، بعد <i data-icon="refresh"></i>.</li>
+          </ul>
+        </div>
+
+        <div class="group danger-zone">
+          <h4>بازنشانی</h4>
+          <button type="button" id="btnReset" class="btn danger block"><i data-icon="trash"></i>برگرداندن همه‌چیز به حالت اول</button>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <!-- ===== single panel settings ===== -->
+  <div id="viewPanel" class="d-view" hidden>
+    <div class="pv-head">
+      <button id="btnBack" type="button" class="icon-btn" title="بازگشت"><i data-icon="back"></i></button>
+      <span id="pvBadge" class="badge"></span>
+      <h3 id="pvName"></h3>
+    </div>
+
+    <div class="d-scroll">
+      <div class="group">
+        <h4>صفحه</h4>
+        <label class="field stack"><span class="f-label">نام</span><input type="text" class="input" data-pbind="title"></label>
+        <label class="field stack"><span class="f-label">آدرس</span><input type="url" class="input" dir="ltr" placeholder="https://…" data-pbind="url" data-lazy></label>
+        <label class="field stack"><span class="f-label">آدرس دوم <small>با کلید روی برچسب پنل بین این دو جابه‌جا شو · خالی یعنی ندارد</small></span><input type="url" class="input" dir="ltr" placeholder="https://…" data-pbind="url2" data-lazy></label>
+        <label class="field" data-when="alt"><span class="f-label">نام آدرس بالا</span><input type="text" class="input" maxlength="20" data-pbind="urlName"></label>
+        <label class="field" data-when="alt"><span class="f-label">نام آدرس دوم</span><input type="text" class="input" maxlength="20" data-pbind="url2Name"></label>
+      </div>
+
+      <div class="group">
+        <h4>اندازهٔ محتوا</h4>
+        <label class="field"><span class="f-label">حالت دسکتاپ <small>وقتی سایت می‌گوید پنجره کوچک است</small></span><input type="checkbox" class="switch" data-pbind="desktop"></label>
+        <label class="field" data-when="desktop"><span class="f-label">عرض صفحه <small>بیشتر = محتوا ریزتر</small></span><input type="number" class="input num" min="320" max="3840" step="20" data-pbind="pageW"></label>
+        <label class="field" data-when="manual"><span class="f-label">بزرگ‌نمایی</span><span class="range"><input type="range" min="25" max="200" step="5" data-pbind="zoom" data-unit="٪"><output></output></span></label>
+      </div>
+
+      <div class="group">
+        <h4>ظاهر</h4>
+        <label class="field" data-when="skin"><span class="f-label">ظاهر شبیه چت <small>اسم در برچسب، مشخصات در کارت</small></span><input type="checkbox" class="switch" data-pbind="skin"></label>
+        <label class="field"><span class="f-label">برچسب نام</span><input type="checkbox" class="switch" data-pbind="header"></label>
+        <label class="field"><span class="f-label">پس‌زمینهٔ شفاف <small>تم از پشت صفحه دیده شود</small></span><input type="checkbox" class="switch" data-pbind="transparent"></label>
+        <label class="field"><span class="f-label">فونت دیوار برای این صفحه</span><input type="checkbox" class="switch" data-pbind="injectFont"></label>
+      </div>
+
+      <div class="group">
+        <h4>اتصال</h4>
+        <label class="field"><span class="f-label">اتصال لاگین <small>اگر وارد حسابت هستی ولی اطلاعات نمی‌آید</small></span><input type="checkbox" class="switch" data-pbind="cookieBridge"></label>
+        <label class="field"><span class="f-label">صدا برای مورد تازه <small>وقتی پنل با مورد جدید درخشید</small></span><input type="checkbox" class="switch" data-pbind="notify"></label>
+        <label class="field" data-when="kickbot"><span class="f-label">ساب و گیفت از صحنه پلاس <small>بین تیپ‌ها به ترتیب زمان · صحنه پلاس باید باز باشد</small></span><input type="checkbox" class="switch" data-pbind="sahne"></label>
+        <div id="sahneStatus" class="field-note" data-when="sahne" data-state="off" role="status"><span class="ss-dot" aria-hidden="true"></span><span class="ss-text">هنوز بررسی نشده</span><a class="ss-get" href="https://github.com/AmirEyZed/sahne-plus/releases/latest" target="_blank" rel="noopener">دانلود آخرین نسخه</a></div>
+        <label class="field"><span class="f-label">تازه‌سازی خودکار <small>ثانیه · ۰ یعنی خاموش</small></span><input type="number" class="input num" min="0" step="5" data-pbind="refresh"></label>
+      </div>
+
+      <div class="group">
+        <h4>فقط بخشی از صفحه</h4>
+        <div class="btn-grid">
+          <button type="button" id="btnPick" class="btn"><i data-icon="crop"></i>انتخاب با ماوس</button>
+          <button type="button" id="btnRegionReset" class="btn ghost"><i data-icon="expand"></i>کل صفحه</button>
+        </div>
+        <div class="grid3">
+          <label><span>از چپ</span><input type="number" class="input num" min="0" step="10" data-pbind="cropX"></label>
+          <label><span>از بالا</span><input type="number" class="input num" min="0" step="10" data-pbind="cropY"></label>
+          <label data-when="desktop"><span>عرض</span><input type="number" class="input num" min="0" step="10" data-pbind="cropW"></label>
+        </div>
+      </div>
+
+      <details class="group">
+        <summary><h4>موقعیت دقیق</h4><i data-icon="chevron"></i></summary>
+        <div class="grid4">
+          <label><span>X ٪</span><input type="number" class="input num" min="0" max="100" step="0.5" data-pbind="x"></label>
+          <label><span>Y ٪</span><input type="number" class="input num" min="0" max="100" step="0.5" data-pbind="y"></label>
+          <label><span>عرض ٪</span><input type="number" class="input num" min="5" max="100" step="0.5" data-pbind="w"></label>
+          <label><span>ارتفاع ٪</span><input type="number" class="input num" min="5" max="100" step="0.5" data-pbind="h"></label>
+        </div>
+        <div class="corner-pad">
+          <button type="button" class="btn sm" data-corner="tl" title="بالا-چپ"><i data-icon="corner-tl"></i></button>
+          <button type="button" class="btn sm" data-corner="tr" title="بالا-راست"><i data-icon="corner-tr"></i></button>
+          <button type="button" class="btn sm" data-corner="bl" title="پایین-چپ"><i data-icon="corner-bl"></i></button>
+          <button type="button" class="btn sm" data-corner="br" title="پایین-راست"><i data-icon="corner-br"></i></button>
+        </div>
+      </details>
+
+      <details class="group">
+        <summary><h4>پیشرفته</h4><i data-icon="chevron"></i></summary>
+        <label class="field"><span class="f-label">حالت امن <small>سایت نتواند کل دیوار را عوض کند</small></span><input type="checkbox" class="switch" data-pbind="sandbox"></label>
+        <label class="field stack"><span class="f-label">CSS سفارشی برای داخل این صفحه</span><textarea class="input code" dir="ltr" rows="6" spellcheck="false" placeholder="body { background: transparent !important; }" data-pbind="css"></textarea></label>
+      </details>
+    </div>
+
+    <footer class="pv-foot">
+      <button type="button" id="btnPReload" class="btn"><i data-icon="refresh"></i>بارگذاری دوباره</button>
+      <button type="button" id="btnPOpen" class="btn"><i data-icon="external"></i>باز کردن در تب</button>
+      <button type="button" id="btnPDelete" class="btn danger" title="حذف پنل"><i data-icon="trash"></i></button>
+    </footer>
+  </div>
+</aside>
+
+<div id="toast" dir="rtl" role="status" aria-live="polite"><i data-icon="info"></i><span class="t-msg"></span><button type="button" class="t-act" hidden></button></div>
+
+<script src="shared.js"></script>
+<script src="dashboard.js"></script>
+<script src="topbar.js"></script>
+</body>
+</html>
